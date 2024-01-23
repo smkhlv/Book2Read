@@ -10,7 +10,7 @@ import Fluent
 struct CreateTokens: AsyncMigration {
     func prepare(on database: Database) async throws {
         let schema = database.schema(Token.schema)
-            .field("id", .uuid, .identifier(auto: true))
+            .id()
             .field("user_id", .uuid, .references("users", "id"))
             .field("value", .string, .required)
             .unique(on: "value")

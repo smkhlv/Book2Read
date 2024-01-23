@@ -20,8 +20,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateUsers())
     app.migrations.add(CreateTokens())
 
-    //try app.autoMigrate().wait() ?
-    
     // register routes
     try routes(app)
 }
