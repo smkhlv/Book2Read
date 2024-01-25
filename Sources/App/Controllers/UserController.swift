@@ -32,9 +32,10 @@ struct UserController: RouteCollection {
         
         let tokenProtected = usersRoute.grouped(Token.authenticator())
         tokenProtected.get("me", use: getMyOwnUser)
+        tokenProtected.post("login", use: login)
         
-        let passwordProtected = usersRoute.grouped(User.authenticator())
-        passwordProtected.post("login", use: login)
+        tokenProtected.delete("delete", use: deleteUser)
+        tokenProtected.post("logout", use: logout)
     }
     
     fileprivate func create(req: Request) throws -> EventLoopFuture<NewSession> {
@@ -67,6 +68,26 @@ struct UserController: RouteCollection {
         return token.save(on: req.db).flatMapThrowing {
             NewSession(token: token.value, user: try user.asPublic())
         }
+    }
+    
+    func deleteUser(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let user = try req.auth.require(User.self)
+        
+        return Token.query(on: req.db)
+            .filter(\.$user.$id == user.id!)
+            .delete()
+            .flatMap {
+                user.delete(on: req.db)
+            }
+            .transform(to: .ok)
+    }
+    
+    func logout(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let token = req.auth.get(Token.self) else {
+            return req.eventLoop.makeFailedFuture(Abort(.notFound))
+        }
+
+        return token.delete(on: req.db).transform(to: .ok)
     }
     
     func getMyOwnUser(req: Request) throws -> User.Public {
