@@ -32,10 +32,11 @@ struct UserController: RouteCollection {
         
         let tokenProtected = usersRoute.grouped(Token.authenticator())
         tokenProtected.get("me", use: getMyOwnUser)
-        tokenProtected.post("login", use: login)
-        
         tokenProtected.delete("delete", use: deleteUser)
         tokenProtected.post("logout", use: logout)
+        
+        let passwordProtected = usersRoute.grouped(User.authenticator())
+        passwordProtected.post("login", use: login)
     }
     
     fileprivate func create(req: Request) throws -> EventLoopFuture<NewSession> {
