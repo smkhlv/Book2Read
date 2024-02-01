@@ -65,6 +65,12 @@ struct BookController: RouteCollection {
         try await bookData.save(on: req.db)
 
         do {
+            try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed to create directory: \(error)")
+        }
+
+        do {
             try await req.fileio.writeFile(file.data, at: fileUrl)
 
             return .created
