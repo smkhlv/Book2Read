@@ -20,7 +20,6 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateUsers())
     app.migrations.add(CreateTokens())
     app.migrations.add(CreateBooks())
-    //app.migrations.add(CreateAuthors())
 
     // register routes
     try routes(app)

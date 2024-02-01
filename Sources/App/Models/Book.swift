@@ -15,7 +15,7 @@ final class Book: Model, Content {
     var id: UUID?
 
     @Field(key: "isbn")
-    var isbn: Int?
+    var isbn: String
 
     @Field(key: "title")
     var title: String
@@ -24,37 +24,37 @@ final class Book: Model, Content {
     var genre: String
 
     @Field(key: "price")
-    var price: Double?
+    var price: Double
 
     @Field(key: "rating")
-    var rating: Double?
+    var rating: Double
 
     @Field(key: "publishDate")
-    var publishDate: Date?
+    var publishDate: Date
 
     @Field(key: "ratingCount")
-    var ratingCount: Int?
+    var ratingCount: Int
 
     @Field(key: "description")
-    var description: String?
+    var description: String
 
-    @Field(key: "isPaperVersionAvaliable")
-    var isPaperVersionAvaliable: Bool?
+    @Field(key: "isPaperVersionAvailable")
+    var isPaperVersionAvailable: Bool
 
     @Field(key: "pageCount")
-    var pageCount: Int?
+    var pageCount: Int
 
-    @Field(key: "isAudibleAvaliable")
-    var isAudibleAvaliable: Bool?
+    @Field(key: "isAudibleAvailable")
+    var isAudibleAvailable: Bool
 
     @Field(key: "backCoverText")
-    var backCoverText: String?
+    var backCoverText: String
 
     @Field(key: "coverImageUrl")
-    var coverImageUrl: String?
+    var coverImageUrl: String
 
-    @Field(key: "authorName")
-    var authorName: String?
+    @Field(key: "authorId")
+    var authorId: UUID
 
     @Field(key: "fileUrl")
     var fileUrl: String
@@ -62,20 +62,20 @@ final class Book: Model, Content {
     init() {}
 
     init(id: UUID? = nil,
-         isbn: Int? = nil,
+         isbn: String,
          title: String,
          genre: String,
-         price: Double? = nil,
-         rating: Double? = nil,
-         publishDate: Date? = nil,
-         ratingCount: Int? = nil,
-         description: String? = nil,
-         isPaperVersionAvaliable: Bool? = nil,
-         pageCount: Int? = nil,
-         isAudibleAvaliable: Bool? = nil,
-         backCoverText: String? = nil,
-         coverImageUrl: String? = nil,
-         authorName: String? = nil,
+         price: Double,
+         rating: Double,
+         publishDate: Date,
+         ratingCount: Int,
+         description: String,
+         isPaperVersionAvailable: Bool,
+         pageCount: Int,
+         isAudibleAvailable: Bool,
+         backCoverText: String,
+         coverImageUrl: String,
+         authorId: UUID,
          fileUrl: String)
     {
         self.id = id
@@ -87,55 +87,59 @@ final class Book: Model, Content {
         self.publishDate = publishDate
         self.ratingCount = ratingCount
         self.description = description
-        self.isPaperVersionAvaliable = isPaperVersionAvaliable
+        self.isPaperVersionAvailable = isPaperVersionAvailable
         self.pageCount = pageCount
-        self.isAudibleAvaliable = isAudibleAvaliable
+        self.isAudibleAvailable = isAudibleAvailable
         self.backCoverText = backCoverText
         self.coverImageUrl = coverImageUrl
-        self.authorName = authorName
+        self.authorId = authorId
         self.fileUrl = fileUrl
-    }
-
-    func asInformation() -> Information {
-        Information(
-            title: title,
-            genre: genre,
-            description: description,
-            price: price,
-            rating: rating,
-            publishDate: publishDate,
-            ratingCount: ratingCount,
-            isPaperVersionAvaliable: isPaperVersionAvaliable,
-            pageCount: pageCount,
-            isAudibleAvaliable: isAudibleAvaliable,
-            backCoverText: backCoverText,
-            coverImageUrl: coverImageUrl,
-            authorName: authorName
-        )
     }
 }
 
 extension Book {
-    struct Information: Content {
-        let title: String?
-        let genre: String?
-        let description: String?
-        let price: Double?
-        let rating: Double?
-        let publishDate: Date?
-        let ratingCount: Int?
-        let isPaperVersionAvaliable: Bool?
-        let pageCount: Int?
-        let isAudibleAvaliable: Bool?
-        let backCoverText: String?
-        let coverImageUrl: String?
-        let authorName: String?
-    }
-
     struct SearchBookQuery: Content {
         let title: String?
         let genre: String?
-        let description: String?
-        let authorName: String?
+    }
+}
+
+extension Book {
+    convenience init(from bookDto: BookDto, withFileUrl fileUrl: String) throws {
+        guard let price = Double(bookDto.price),
+              let rating = Double(bookDto.rating),
+              let ratingCount = Int(bookDto.ratingCount),
+              let pageCount = Int(bookDto.pageCount)
+        else {
+            throw Abort(.badRequest, reason: "Invalid format for numeric fields.")
+        }
+
+        guard let publishDate = DateFormatter.bookDateFormatter.date(from: bookDto.publishDate) else {
+            throw Abort(.badRequest, reason: "Invalid format for date fields.")
+        }
+
+        guard let isPaperVersionAvailable = Bool(bookDto.isPaperVersionAvailable),
+              let isAudibleAvailable = Bool(bookDto.isAudibleAvailable)
+        else {
+            throw Abort(.badRequest, reason: "Invalid format for bool fields.")
+        }
+
+        self.init(
+            isbn: bookDto.isbn,
+            title: bookDto.title,
+            genre: bookDto.genre,
+            price: price,
+            rating: rating,
+            publishDate: publishDate,
+            ratingCount: ratingCount,
+            description: bookDto.description,
+            isPaperVersionAvailable: isPaperVersionAvailable,
+            pageCount: pageCount,
+            isAudibleAvailable: isAudibleAvailable,
+            backCoverText: bookDto.backCoverText,
+            coverImageUrl: bookDto.coverImageUrl,
+            authorId: UUID(uuidString: bookDto.authorId) ?? UUID(),
+            fileUrl: fileUrl
+        )
     }
 }
