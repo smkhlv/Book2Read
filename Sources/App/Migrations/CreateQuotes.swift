@@ -4,8 +4,8 @@ struct CreateQuotes: AsyncMigration {
     func prepare(on database: FluentKit.Database) async throws {
         let schema = database.schema(Quote.schema)
             .id()
-            .field("user_id", .uuid, .required, .references("users", "id", onDelete: .cascade))
-            .field("book_id", .uuid, .required, .references("books", "id", onDelete: .cascade))
+            .field("user_id", .uuid, .required, .references("users", "id"))
+            .field("book_id", .uuid, .required, .references("books", "id"))
             .field("quote_text", .string, .required)
             .field("page_number", .int)
         

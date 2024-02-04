@@ -23,6 +23,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateReadingProgress())
     app.migrations.add(CreateQuotes())
     app.migrations.add(CreateReview())
+    app.migrations.add(CreateAudioBooks())
 
     // register routes
     try routes(app)

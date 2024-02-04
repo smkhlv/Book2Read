@@ -16,6 +16,9 @@ final class Book: Model, Content {
 
     @Field(key: "isbn")
     var isbn: String
+    
+    @OptionalChild(for: \.$book)
+    var audioBook: AudioBook?
 
     @Field(key: "title")
     var title: String
