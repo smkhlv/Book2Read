@@ -30,3 +30,10 @@ final class ReadingProgress: Model, Content {
     }
 }
 
+extension ReadingProgress {
+    struct Public: Content {
+        let userId: UUID
+        let bookId: UUID?
+    }
+}
+

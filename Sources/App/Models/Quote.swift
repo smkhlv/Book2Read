@@ -30,3 +30,9 @@ final class Quote: Model, Content {
     }
 }
 
+extension Quote {
+    struct Public: Content {
+        let userId: UUID
+        let bookId: UUID?
+    }
+}

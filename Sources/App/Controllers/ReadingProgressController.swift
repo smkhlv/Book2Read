@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 struct ReadingProgressController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -8,6 +9,19 @@ struct ReadingProgressController: RouteCollection {
         tokenProtected.post(use: addReadingProgress)
         tokenProtected.put(":readingProgressID", use: updateReadingProgress)
         tokenProtected.delete(":readingProgressID", use: deleteReadingProgress)
+        tokenProtected.get("forBook", use: getReadingProgressForBook)
+    }
+    
+    func getReadingProgressForBook(req: Request) async throws -> [ReadingProgress] {
+        let searchQuery = try req.query.decode(ReadingProgress.Public.self)
+        return try await ReadingProgress.query(on: req.db)
+            .group(.and) { and in
+                and.filter(\.$user.$id == searchQuery.userId)
+                if let bookId = searchQuery.bookId {
+                    and.filter(\.$book.$id == bookId)
+                }
+            }
+            .all()
     }
     
     func addReadingProgress(req: Request) async throws -> ReadingProgress {

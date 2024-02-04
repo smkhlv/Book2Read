@@ -72,7 +72,6 @@ struct BookController: RouteCollection {
 
         do {
             try await req.fileio.writeFile(file.data, at: fileUrl)
-
             return .created
         } catch {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error)")
@@ -90,7 +89,6 @@ struct BookController: RouteCollection {
             }
 
             let fileUrl = book.fileUrl
-
             return req.fileio.streamFile(at: fileUrl)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to find a book \(itemID): \(error)")
