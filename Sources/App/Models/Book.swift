@@ -61,6 +61,9 @@ final class Book: Model, Content {
 
     @Field(key: "fileUrl")
     var fileUrl: String
+    
+    @Field(key: "language")
+    var language: String
 
     init() {}
 
