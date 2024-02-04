@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Sergei on 4.2.24..
-//
-
 import Vapor
 
 struct QuotesController: RouteCollection {
