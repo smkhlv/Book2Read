@@ -19,9 +19,9 @@ final class Quote: Model, Content {
     @Field(key: "page_number")
     var pageNumber: Int
 
-    init() {}
+    init() { }
 
-    init(id: UUID? = nil, userID: User.IDValue, bookID: Book.IDValue, quoteText: String, pageNumber: Int) {
+    init(id: UUID? = nil, userID: UUID, bookID: UUID, quoteText: String, pageNumber: Int) {
         self.id = id
         self.$user.id = userID
         self.$book.id = bookID

@@ -19,9 +19,9 @@ final class ReadingProgress: Model, Content {
     @Field(key: "last_update")
     var lastUpdate: Date
 
-    init() {}
+    init() { }
 
-    init(id: UUID? = nil, userID: User.IDValue, bookID: Book.IDValue, currentPage: Int, lastUpdate: Date) {
+    init(id: UUID? = nil, userID: UUID, bookID: UUID, currentPage: Int, lastUpdate: Date) {
         self.id = id
         self.$user.id = userID
         self.$book.id = bookID
