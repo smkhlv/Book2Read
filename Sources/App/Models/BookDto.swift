@@ -20,7 +20,7 @@ struct BookDto: Content {
     var pageCount: String
     var isAudibleAvailable: String
     var backCoverText: String
-    var coverImageUrl: String
+    var coverImageFile: File
     var authorId: String
     var language: String
     let file: File

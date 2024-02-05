@@ -16,7 +16,7 @@ final class Book: Model, Content {
 
     @Field(key: "isbn")
     var isbn: String
-    
+
     @OptionalChild(for: \.$book)
     var audioBook: AudioBook?
 
@@ -61,7 +61,7 @@ final class Book: Model, Content {
 
     @Field(key: "fileUrl")
     var fileUrl: String
-    
+
     @Field(key: "language")
     var language: String
 
@@ -113,7 +113,10 @@ extension Book {
 }
 
 extension Book {
-    convenience init(from bookDto: BookDto, withFileUrl fileUrl: String) throws {
+    convenience init(from bookDto: BookDto,
+                     withFileUrl fileUrl: String,
+                     coverImageUrl: String) throws
+    {
         guard let price = Double(bookDto.price),
               let rating = Double(bookDto.rating),
               let ratingCount = Int(bookDto.ratingCount),
@@ -145,7 +148,7 @@ extension Book {
             pageCount: pageCount,
             isAudibleAvailable: isAudibleAvailable,
             backCoverText: bookDto.backCoverText,
-            coverImageUrl: bookDto.coverImageUrl,
+            coverImageUrl: coverImageUrl,
             authorId: UUID(uuidString: bookDto.authorId) ?? UUID(),
             language: bookDto.language,
             fileUrl: fileUrl

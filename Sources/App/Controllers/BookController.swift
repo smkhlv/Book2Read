@@ -12,7 +12,7 @@ struct BookController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let scheme = Book.schema
         let schemePath = PathComponent(stringLiteral: scheme)
-        
+
         let booksRoute = routes.grouped(schemePath)
         let tokenProtected = booksRoute.grouped(Token.authenticator())
 
@@ -58,27 +58,37 @@ struct BookController: RouteCollection {
 
     private func create(req: Request) async throws -> HTTPStatus {
         let bookDto = try req.content.decode(BookDto.self)
-        let file = bookDto.file
+        let bookFile = bookDto.file
+        let coverImageFile = bookDto.coverImageFile
 
-        let uploadPath = req.application.directory.workingDirectory + "uploads/books/"
-        let filename = file.filename
-        let fileUrl = uploadPath + filename
+        let bookUploadPath = req.application.directory.workingDirectory + "uploads/books/"
+        let bookFilename = bookFile.filename
+        let bookFileUrl = bookUploadPath + bookFilename
 
-        let bookData = try Book(from: bookDto, withFileUrl: fileUrl)
-        try await bookData.save(on: req.db)
+        let coverImageUploadPath = req.application.directory.workingDirectory + "uploads/bookCovers/"
+        let coverImageFilename = coverImageFile.filename
+        let coverImageFileUrl = coverImageUploadPath + coverImageFilename
 
         do {
-            try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(atPath: bookUploadPath, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(atPath: coverImageUploadPath, withIntermediateDirectories: true, attributes: nil)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to create directory: \(error)")
         }
 
         do {
-            try await req.fileio.writeFile(file.data, at: fileUrl)
-            return .created
+            try await req.fileio.writeFile(bookFile.data, at: bookFileUrl)
+            try await req.fileio.writeFile(coverImageFile.data, at: coverImageFileUrl)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error)")
         }
+
+        let bookData = try Book(from: bookDto,
+                                withFileUrl: bookFileUrl,
+                                coverImageUrl: coverImageFileUrl)
+        try await bookData.save(on: req.db)
+        
+        return .created
     }
 
     private func downloadBook(req: Request) async throws -> Response {

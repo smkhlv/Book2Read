@@ -37,14 +37,7 @@ struct AudioBookController: RouteCollection {
         let uploadPath = req.application.directory.workingDirectory + "uploads/audiobooks/"
         let filename = file.filename
         let fileUrl = uploadPath + filename
-
-        let bookData = try AudioBook(price: audioBookDto.price,
-                                     book: parentBook,
-                                     rating: audioBookDto.rating,
-                                     ratingCount: audioBookDto.ratingCount,
-                                     fileUrl: fileUrl)
-        try await bookData.save(on: req.db)
-
+        
         do {
             try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
         } catch {
@@ -53,10 +46,18 @@ struct AudioBookController: RouteCollection {
 
         do {
             try await req.fileio.writeFile(file.data, at: fileUrl)
-            return .created
         } catch {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error)")
         }
+
+        let bookData = try AudioBook(price: audioBookDto.price,
+                                     book: parentBook,
+                                     rating: audioBookDto.rating,
+                                     ratingCount: audioBookDto.ratingCount,
+                                     fileUrl: fileUrl)
+        try await bookData.save(on: req.db)
+        
+        return .created
     }
 
     private func downloadBook(req: Request) async throws -> Response {
