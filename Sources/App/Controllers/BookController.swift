@@ -10,7 +10,10 @@ import Vapor
 
 struct BookController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
-        let booksRoute = routes.grouped("books")
+        let scheme = Book.schema
+        let schemePath = PathComponent(stringLiteral: scheme)
+        
+        let booksRoute = routes.grouped(schemePath)
         let tokenProtected = booksRoute.grouped(Token.authenticator())
 
         tokenProtected.get("all", use: getAllBooks)
