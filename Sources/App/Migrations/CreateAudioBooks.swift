@@ -8,7 +8,7 @@ struct CreateAudioBooks: AsyncMigration {
             .field("rating", .double, .required)
             .field("ratingCount", .int, .required)
             .field("fileUrl", .string, .required)
-            .field("book_id", .uuid, .references(Book.schema, "id"))
+            .field("book_id", .uuid, .required, .references(Book.schema, "id"))
 
         try await schema.create()
     }
