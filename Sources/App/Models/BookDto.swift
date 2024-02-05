@@ -22,5 +22,6 @@ struct BookDto: Content {
     var backCoverText: String
     var coverImageUrl: String
     var authorId: String
+    var language: String
     let file: File
 }

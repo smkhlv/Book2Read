@@ -82,6 +82,7 @@ final class Book: Model, Content {
          backCoverText: String,
          coverImageUrl: String,
          authorId: UUID,
+         language: String,
          fileUrl: String)
     {
         self.id = id
@@ -99,6 +100,7 @@ final class Book: Model, Content {
         self.backCoverText = backCoverText
         self.coverImageUrl = coverImageUrl
         self.authorId = authorId
+        self.language = language
         self.fileUrl = fileUrl
     }
 }
@@ -145,6 +147,7 @@ extension Book {
             backCoverText: bookDto.backCoverText,
             coverImageUrl: bookDto.coverImageUrl,
             authorId: UUID(uuidString: bookDto.authorId) ?? UUID(),
+            language: bookDto.language,
             fileUrl: fileUrl
         )
     }
