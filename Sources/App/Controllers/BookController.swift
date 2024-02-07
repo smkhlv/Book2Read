@@ -21,6 +21,7 @@ struct BookController: RouteCollection {
         tokenProtected.get("find", use: findBook)
         tokenProtected.post("create", use: create)
         tokenProtected.get(":itemID", "download", use: downloadBook)
+        tokenProtected.get("coverImages", ":name", use: downloadCoverImage)
     }
 
     private func getAllBooks(req: Request) throws -> EventLoopFuture<[Book]> {
@@ -83,11 +84,13 @@ struct BookController: RouteCollection {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error)")
         }
 
+        let downloadCoverImageUrl = "\(Book.schema)/coverImages/\(coverImageFilename)"
+
         let bookData = try Book(from: bookDto,
                                 withFileUrl: bookFileUrl,
-                                coverImageUrl: coverImageFileUrl)
+                                coverImageUrl: downloadCoverImageUrl)
         try await bookData.save(on: req.db)
-        
+
         return .created
     }
 
@@ -106,5 +109,14 @@ struct BookController: RouteCollection {
         } catch {
             throw Abort(.internalServerError, reason: "Failed to find a book \(itemID): \(error)")
         }
+    }
+
+    private func downloadCoverImage(req: Request) async throws -> Response {
+        guard let imageName = req.parameters.get("name") else {
+            throw Abort(.notFound, reason: "Image not found")
+        }
+
+        let path = req.application.directory.workingDirectory + "uploads/bookCovers/" + imageName
+        return req.fileio.streamFile(at: path)
     }
 }
