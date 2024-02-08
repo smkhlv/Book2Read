@@ -104,6 +104,8 @@ struct UserController: RouteCollection {
         let user = try req.auth.require(User.self)
 
         user.boughtBooksIds.append(bookId)
+        
+        try await user.save(on: req.db)
 
         return .ok
     }
