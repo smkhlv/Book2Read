@@ -102,6 +102,10 @@ struct UserController: RouteCollection {
         }
 
         let user = try req.auth.require(User.self)
+        
+        guard !user.boughtBooksIds.contains(bookId) else {
+            throw Abort(.badRequest, reason: "Book is already bought")
+        }
 
         user.boughtBooksIds.append(bookId)
         
