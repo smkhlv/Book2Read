@@ -14,6 +14,7 @@ final class User: Model {
         let username: String
         let createdAt: Date?
         let updatedAt: Date?
+        let boughtBooksIds: [UUID]
     }
 
     static let schema = "users"
@@ -33,12 +34,16 @@ final class User: Model {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
 
+    @Field(key: "bought_book_ids")
+    var boughtBooksIds: [UUID]
+
     init() {}
 
-    init(id: UUID? = nil, username: String, passwordHash: String) {
+    init(id: UUID? = nil, username: String, passwordHash: String, boughtBooksIds: [UUID] = []) {
         self.id = id
         self.username = username
         self.passwordHash = passwordHash
+        self.boughtBooksIds = boughtBooksIds
     }
 }
 
@@ -58,7 +63,8 @@ extension User {
         try Public(id: requireID(),
                    username: username,
                    createdAt: createdAt,
-                   updatedAt: updatedAt)
+                   updatedAt: updatedAt,
+                   boughtBooksIds: boughtBooksIds)
     }
 }
 
