@@ -10,12 +10,12 @@ struct ReviewController: RouteCollection {
         reviewRoutes.delete(":reviewID", use: deleteReview)
     }
 
-    func addReview(req: Request) async throws -> Review {
+    func addReview(req: Request) async throws -> HTTPStatus {
         let review = try req.content.decode(Review.self)
 
         try await review.save(on: req.db)
 
-        return review
+        return .ok
     }
 
     func getReviewsForBook(req: Request) throws -> EventLoopFuture<[Review]> {
