@@ -14,16 +14,16 @@ struct AudioBookController: RouteCollection {
         let tokenProtected = audioBooksRoute.grouped(Token.authenticator())
         
         tokenProtected.post("create", use: create)
-        tokenProtected.get(":itemID", use: getDetail)
-        tokenProtected.get(":itemID", "download", use: downloadBook)
+        tokenProtected.get(":bookId", use: getDetail)
+        tokenProtected.get(":bookId", "download", use: downloadBook)
     }
     
     private func getDetail(req: Request) async throws -> AudioBook {
-        guard let itemID = req.parameters.get("itemID", as: UUID.self) else {
+        guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid AudioBook ID")
         }
 
-        return try await AudioBook.find(itemID, on: req.db).unsafelyUnwrapped
+        return try await AudioBook.find(bookId, on: req.db).unsafelyUnwrapped
     }
     
     private func create(req: Request) async throws -> HTTPStatus {
@@ -61,19 +61,19 @@ struct AudioBookController: RouteCollection {
     }
 
     private func downloadBook(req: Request) async throws -> Response {
-        guard let itemID = req.parameters.get("itemID", as: UUID.self) else {
+        guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid AudioBook ID")
         }
 
         do {
-            guard let book = try await AudioBook.find(itemID, on: req.db) else {
-                throw Abort(.notFound, reason: "Book \(itemID) is not found")
+            guard let book = try await AudioBook.find(bookId, on: req.db) else {
+                throw Abort(.notFound, reason: "Book \(bookId) is not found")
             }
 
             let fileUrl = book.fileUrl
             return req.fileio.streamFile(at: fileUrl)
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to find a book \(itemID): \(error)")
+            throw Abort(.internalServerError, reason: "Failed to find a book \(bookId): \(error)")
         }
     }
 }

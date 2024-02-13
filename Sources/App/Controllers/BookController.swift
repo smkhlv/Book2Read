@@ -17,10 +17,11 @@ struct BookController: RouteCollection {
         let tokenProtected = booksRoute.grouped(Token.authenticator())
 
         tokenProtected.get("all", use: getAllBooks)
-        tokenProtected.get(":itemID", use: getDetail)
+        tokenProtected.get(":bookId", use: getDetail)
         tokenProtected.get("find", use: findBook)
         tokenProtected.post("create", use: create)
-        tokenProtected.get(":itemID", "download", use: downloadBook)
+        tokenProtected.get(":bookId", "download", use: downloadBook)
+        tokenProtected.delete("delete", ":bookId", use: deleteBook)
         tokenProtected.get("coverImages", ":name", use: downloadCoverImage)
     }
 
@@ -33,11 +34,11 @@ struct BookController: RouteCollection {
     }
 
     private func getDetail(req: Request) async throws -> Book {
-        guard let itemID = req.parameters.get("itemID", as: UUID.self) else {
+        guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid book ID")
         }
 
-        return try await Book.find(itemID, on: req.db).unsafelyUnwrapped
+        return try await Book.find(bookId, on: req.db).unsafelyUnwrapped
     }
 
     private func findBook(req: Request) throws -> EventLoopFuture<[Book]> {
@@ -95,19 +96,32 @@ struct BookController: RouteCollection {
     }
 
     private func downloadBook(req: Request) async throws -> Response {
-        guard let itemID = req.parameters.get("itemID", as: UUID.self) else {
+        guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid book ID")
         }
 
-        do {
-            guard let book = try await Book.find(itemID, on: req.db) else {
-                throw Abort(.notFound, reason: "Book \(itemID) is not found")
-            }
+        guard let book = try? await Book.find(bookId, on: req.db) else {
+            throw Abort(.notFound, reason: "Book \(bookId) is not found")
+        }
 
-            let fileUrl = book.fileUrl
-            return req.fileio.streamFile(at: fileUrl)
+        return req.fileio.streamFile(at: book.fileUrl)
+    }
+
+    private func deleteBook(req: Request) async throws -> Response {
+        guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid book ID")
+        }
+
+        guard let book = try? await Book.find(bookId, on: req.db) else {
+            throw Abort(.notFound, reason: "Book \(bookId) is not found")
+        }
+
+        do {
+            try await book.delete(on: req.db)
+
+            return Response(status: .ok)
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to find a book \(itemID): \(error)")
+            throw Abort(.internalServerError, reason: "Failed to delete the book \(bookId): \(error)")
         }
     }
 
