@@ -62,11 +62,11 @@ struct BookController: RouteCollection {
         let bookFile = bookDto.file
         let coverImageFile = bookDto.coverImageFile
 
-        let bookUploadPath = req.application.directory.workingDirectory + "uploads/books/"
+        let bookUploadPath = req.application.directory.resourcesDirectory + "books/"
         let bookFilename = bookFile.filename
         let bookFileUrl = bookUploadPath + bookFilename
 
-        let coverImageUploadPath = req.application.directory.workingDirectory + "uploads/bookCovers/"
+        let coverImageUploadPath = req.application.directory.resourcesDirectory + "bookCovers/"
         let coverImageFilename = coverImageFile.filename
         let coverImageFileUrl = coverImageUploadPath + coverImageFilename
 
@@ -116,7 +116,7 @@ struct BookController: RouteCollection {
             throw Abort(.notFound, reason: "Image not found")
         }
 
-        let path = req.application.directory.workingDirectory + "uploads/bookCovers/" + imageName
+        let path = req.application.directory.resourcesDirectory + "bookCovers/" + imageName
         return req.fileio.streamFile(at: path)
     }
 }
