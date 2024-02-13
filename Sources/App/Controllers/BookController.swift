@@ -117,6 +117,15 @@ struct BookController: RouteCollection {
         }
 
         do {
+            try? FileManager.default.removeItem(atPath: book.fileUrl)
+
+            if let coverImageFilename = URL(string: book.coverImageUrl)?.lastPathComponent {
+                let coverImageUploadPath = req.application.directory.resourcesDirectory + "bookCovers/"
+                let coverImageFileUrl = coverImageUploadPath + coverImageFilename
+
+                try? FileManager.default.removeItem(atPath: coverImageFileUrl)
+            }
+
             try await book.delete(on: req.db)
 
             return Response(status: .ok)
