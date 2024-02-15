@@ -49,7 +49,7 @@ struct BookController: RouteCollection {
                     or.filter(\.$title ~~ title)
                 }
                 if let genre = searchQuery.genre {
-                    or.filter(\.$genre ~= genre)
+                    or.filter(\.$genre =~ genre)
                 }
             }
             .paginate(for: req)
