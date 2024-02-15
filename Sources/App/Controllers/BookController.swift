@@ -46,7 +46,7 @@ struct BookController: RouteCollection {
         return Book.query(on: req.db)
             .group(.or) { or in
                 if let title = searchQuery.title {
-                    or.filter(\.$title ~~ title)
+                    or.filter(\.$title, .custom("ILIKE"), "%\(title)%")
                 }
                 if let genre = searchQuery.genre {
                     or.filter(\.$genre =~ genre)
