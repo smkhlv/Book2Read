@@ -46,10 +46,10 @@ struct BookController: RouteCollection {
         return Book.query(on: req.db)
             .group(.or) { or in
                 if let title = searchQuery.title {
-                    or.filter(\.$title == title)
+                    or.filter(\.$title ~~ title)
                 }
                 if let genre = searchQuery.genre {
-                    or.filter(\.$genre == genre)
+                    or.filter(\.$genre ~= genre)
                 }
             }
             .paginate(for: req)
