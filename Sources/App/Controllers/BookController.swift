@@ -75,14 +75,14 @@ struct BookController: RouteCollection {
             try FileManager.default.createDirectory(atPath: bookUploadPath, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.createDirectory(atPath: coverImageUploadPath, withIntermediateDirectories: true, attributes: nil)
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to create directory: \(error)")
+            throw Abort(.internalServerError, reason: "Failed to create directory: \(error.localizedDescription)")
         }
 
         do {
             try await req.fileio.writeFile(bookFile.data, at: bookFileUrl)
             try await req.fileio.writeFile(coverImageFile.data, at: coverImageFileUrl)
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to write file: \(error)")
+            throw Abort(.internalServerError, reason: "Failed to write file: \(error.localizedDescription)")
         }
 
         let downloadCoverImageUrl = "\(Book.schema)/coverImages/\(coverImageFilename)"
@@ -130,7 +130,7 @@ struct BookController: RouteCollection {
 
             return Response(status: .ok)
         } catch {
-            throw Abort(.internalServerError, reason: "Failed to delete the book \(bookId): \(error)")
+            throw Abort(.internalServerError, reason: "Failed to delete the book \(bookId): \(error.localizedDescription)")
         }
     }
 
