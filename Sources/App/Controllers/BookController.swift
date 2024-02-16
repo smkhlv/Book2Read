@@ -44,12 +44,12 @@ struct BookController: RouteCollection {
     private func findBook(req: Request) throws -> EventLoopFuture<[Book]> {
         let searchQuery = try req.query.decode(Book.SearchBookQuery.self)
         return Book.query(on: req.db)
-            .group(.or) { or in
+            .group(.and) { and in
                 if let title = searchQuery.title {
-                    or.filter(\.$title, .custom("ILIKE"), "%\(title)%")
+                    and.filter(\.$title, .custom("ILIKE"), "%\(title)%")
                 }
                 if let genre = searchQuery.genre {
-                    or.filter(\.$genre =~ genre)
+                    and.filter(\.$genre == genre)
                 }
             }
             .paginate(for: req)
