@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  AudioBookController.swift
 //
 //
 //  Created by Sergei on 4.2.24..
@@ -23,7 +23,9 @@ struct AudioBookController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid AudioBook ID")
         }
 
-        return try await AudioBook.find(bookId, on: req.db).unsafelyUnwrapped
+        return try await AudioBook.find(bookId, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .get()
     }
 
     private func create(req: Request) async throws -> HTTPStatus {
