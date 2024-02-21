@@ -14,6 +14,7 @@ struct CreateUsers: AsyncMigration {
             .field("username", .string, .required)
             .unique(on: "username")
             .field("password_hash", .string, .required)
+            .field("language", .string, .required)
             .field("created_at", .datetime, .required)
             .field("updated_at", .datetime, .required)
             .field("bought_book_ids", .array(of: .string), .required)
