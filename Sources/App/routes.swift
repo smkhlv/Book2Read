@@ -12,6 +12,7 @@ func routes(_ app: Application) throws {
     try app.register(collection: ReadingProgressController())
     try app.register(collection: ReviewController())
     try app.register(collection: AudioBookController())
+    try app.register(collection: NewsController())
 
     app.routes.defaultMaxBodySize = "100mb"
 }
