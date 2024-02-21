@@ -26,5 +26,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateQuotes())
     app.migrations.add(CreateReview())
 
+    app.migrations.add(CreateNews())
+
     try routes(app)
 }

@@ -37,7 +37,7 @@ struct AudioBookController: RouteCollection {
         let file = audioBookDto.file
 
         let uploadPath = req.application.directory.workingDirectory + "uploads/audiobooks/"
-        let filename = file.filename
+        let filename = UUID().uuidString
         let fileUrl = uploadPath + filename
 
         do {

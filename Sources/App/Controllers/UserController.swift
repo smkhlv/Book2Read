@@ -11,6 +11,7 @@ import Vapor
 struct UserSignup: Content {
     let username: String
     let password: String
+    let language: String
 }
 
 struct NewSession: Content {

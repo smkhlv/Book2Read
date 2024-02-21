@@ -70,7 +70,7 @@ struct BookController: RouteCollection {
         let coverImageFile = bookDto.coverImageFile
 
         let bookUploadPath = req.application.directory.resourcesDirectory + "books/"
-        let bookFilename = bookFile.filename
+        let bookFilename = UUID().uuidString
         let bookFileUrl = bookUploadPath + bookFilename
 
         let coverImageUploadPath = req.application.directory.resourcesDirectory + "bookCovers/"
