@@ -39,7 +39,9 @@ struct BookController: RouteCollection {
             throw Abort(.badRequest, reason: "Invalid book ID")
         }
 
-        return try await Book.find(bookId, on: req.db).unsafelyUnwrapped
+        return try await Book.find(bookId, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .get()
     }
 
     private func findBook(req: Request) throws -> EventLoopFuture<[Book]> {
