@@ -26,12 +26,13 @@ struct BookController: RouteCollection {
         tokenProtected.get("ids", use: getBooksByIds)
     }
 
-    private func getAllBooks(req: Request) throws -> EventLoopFuture<[Book]> {
-        Book.query(on: req.db)
+    private func getAllBooks(req: Request) async throws -> [Book] {
+        try await Book.query(on: req.db)
             .paginate(for: req)
             .map { page in
                 page.items
             }
+            .get()
     }
 
     private func getDetail(req: Request) async throws -> Book {
