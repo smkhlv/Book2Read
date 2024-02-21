@@ -23,6 +23,7 @@ struct BookController: RouteCollection {
         tokenProtected.get(":bookId", "download", use: downloadBook)
         tokenProtected.delete("delete", ":bookId", use: deleteBook)
         tokenProtected.get("coverImages", ":name", use: downloadCoverImage)
+        tokenProtected.get("ids", use: getBooksByIds)
     }
 
     private func getAllBooks(req: Request) throws -> EventLoopFuture<[Book]> {
@@ -70,13 +71,6 @@ struct BookController: RouteCollection {
         let coverImageUploadPath = req.application.directory.resourcesDirectory + "bookCovers/"
         let coverImageFilename = coverImageFile.filename
         let coverImageFileUrl = coverImageUploadPath + coverImageFilename
-
-        do {
-            try FileManager.default.createDirectory(atPath: bookUploadPath, withIntermediateDirectories: true, attributes: nil)
-            try FileManager.default.createDirectory(atPath: coverImageUploadPath, withIntermediateDirectories: true, attributes: nil)
-        } catch {
-            throw Abort(.internalServerError, reason: "Failed to create directory: \(error.localizedDescription)")
-        }
 
         do {
             try await req.fileio.writeFile(bookFile.data, at: bookFileUrl)
@@ -141,5 +135,19 @@ struct BookController: RouteCollection {
 
         let path = req.application.directory.resourcesDirectory + "bookCovers/" + imageName
         return req.fileio.streamFile(at: path)
+    }
+
+    private func getBooksByIds(req: Request) throws -> EventLoopFuture<[Book]> {
+        guard let bookIds = req.query["ids"].flatMap({ (ids: String) -> [String] in
+            ids.components(separatedBy: ",")
+        }) else {
+            throw Abort(.badRequest, reason: "Book IDs are missing in the request")
+        }
+
+        let uuids = bookIds.compactMap { UUID($0) }
+
+        return Book.query(on: req.db)
+            .filter(\.$id ~~ uuids)
+            .all()
     }
 }
