@@ -45,9 +45,10 @@ struct BookController: RouteCollection {
             .get()
     }
 
-    private func findBook(req: Request) throws -> EventLoopFuture<[Book]> {
+    private func findBook(req: Request) async throws -> [Book] {
         let searchQuery = try req.query.decode(Book.SearchBookQuery.self)
-        return Book.query(on: req.db)
+
+        return try await Book.query(on: req.db)
             .group(.and) { and in
                 if let title = searchQuery.title {
                     and.filter(\.$title, .custom("ILIKE"), "%\(title)%")
@@ -60,6 +61,7 @@ struct BookController: RouteCollection {
             .map { page in
                 page.items
             }
+            .get()
     }
 
     private func create(req: Request) async throws -> HTTPStatus {
