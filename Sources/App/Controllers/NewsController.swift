@@ -53,6 +53,12 @@ struct NewsController: RouteCollection {
         let fileUrl = uploadPath + filename
 
         do {
+            try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed to create directory: \(error.localizedDescription)")
+        }
+
+        do {
             try await req.fileio.writeFile(imageFile.data, at: fileUrl)
         } catch {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error.localizedDescription)")

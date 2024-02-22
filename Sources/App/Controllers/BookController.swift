@@ -78,6 +78,13 @@ struct BookController: RouteCollection {
         let coverImageFileUrl = coverImageUploadPath + coverImageFilename
 
         do {
+            try FileManager.default.createDirectory(atPath: bookUploadPath, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(atPath: coverImageUploadPath, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            throw Abort(.internalServerError, reason: "Failed to create directory: \(error.localizedDescription)")
+        }
+
+        do {
             try await req.fileio.writeFile(bookFile.data, at: bookFileUrl)
             try await req.fileio.writeFile(coverImageFile.data, at: coverImageFileUrl)
         } catch {
