@@ -36,12 +36,13 @@ struct UserController: RouteCollection {
         tokenProtected.delete("delete", use: deleteUser)
         tokenProtected.post("logout", use: logout)
         tokenProtected.post(":bookId", "buy", use: buyBook)
+        tokenProtected.post("setLanguage", use: setLanguage)
 
         let passwordProtected = usersRoute.grouped(User.authenticator())
         passwordProtected.post("login", use: login)
     }
 
-    fileprivate func create(req: Request) throws -> EventLoopFuture<NewSession> {
+    private func create(req: Request) throws -> EventLoopFuture<NewSession> {
         try UserSignup.validate(content: req)
         let userSignup = try req.content.decode(UserSignup.self)
         let user = try User.create(from: userSignup)
@@ -64,7 +65,7 @@ struct UserController: RouteCollection {
         }
     }
 
-    fileprivate func login(req: Request) throws -> EventLoopFuture<NewSession> {
+    private func login(req: Request) throws -> EventLoopFuture<NewSession> {
         let user = try req.auth.require(User.self)
         let token = try user.createToken(source: .login)
 
@@ -73,7 +74,7 @@ struct UserController: RouteCollection {
         }
     }
 
-    func deleteUser(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    private func deleteUser(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let user = try req.auth.require(User.self)
 
         return Token.query(on: req.db)
@@ -85,7 +86,7 @@ struct UserController: RouteCollection {
             .transform(to: .ok)
     }
 
-    func logout(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    private func logout(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         guard let token = req.auth.get(Token.self) else {
             return req.eventLoop.makeFailedFuture(Abort(.notFound))
         }
@@ -93,23 +94,34 @@ struct UserController: RouteCollection {
         return token.delete(on: req.db).transform(to: .ok)
     }
 
-    func getMyOwnUser(req: Request) throws -> User.Public {
+    private func getMyOwnUser(req: Request) throws -> User.Public {
         try req.auth.require(User.self).asPublic()
     }
 
-    func buyBook(req: Request) async throws -> HTTPStatus {
+    private func buyBook(req: Request) async throws -> HTTPStatus {
         guard let bookId = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid book ID")
         }
 
         let user = try req.auth.require(User.self)
-        
+
         guard !user.boughtBooksIds.contains(bookId) else {
             throw Abort(.badRequest, reason: "Book is already bought")
         }
 
         user.boughtBooksIds.append(bookId)
-        
+
+        try await user.save(on: req.db)
+
+        return .ok
+    }
+
+    func setLanguage(req: Request) async throws -> HTTPStatus {
+        let user = try req.auth.require(User.self)
+        let newLanguage = try req.content.decode(String.self)
+
+        user.language = newLanguage
+
         try await user.save(on: req.db)
 
         return .ok
