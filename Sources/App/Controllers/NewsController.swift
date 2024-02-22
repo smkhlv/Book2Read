@@ -49,8 +49,9 @@ struct NewsController: RouteCollection {
 
         let directoryConfig = DirectoryConfiguration.detect()
         let uploadPath = directoryConfig.resourcesDirectory + "newsImages/"
-        let filename = UUID().uuidString
-        let fileUrl = uploadPath + filename
+        let fileExtension = imageFile.extension.map { ".\($0)" } ?? ""
+        let fileName = UUID().uuidString + fileExtension
+        let fileUrl = uploadPath + fileName
 
         do {
             try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
@@ -64,7 +65,7 @@ struct NewsController: RouteCollection {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error.localizedDescription)")
         }
 
-        let downloadImageUrl = "\(News.schema)/images/\(filename)"
+        let downloadImageUrl = "\(News.schema)/images/\(fileName)"
 
         let newsData = try News(from: newsDto, withImageUrl: downloadImageUrl)
         try await newsData.save(on: req.db)

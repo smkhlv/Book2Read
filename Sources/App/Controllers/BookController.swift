@@ -70,12 +70,14 @@ struct BookController: RouteCollection {
         let coverImageFile = bookDto.coverImageFile
 
         let bookUploadPath = req.application.directory.resourcesDirectory + "books/"
-        let bookFilename = UUID().uuidString
-        let bookFileUrl = bookUploadPath + bookFilename
+        let bookFileExtension = bookFile.extension.map { ".\($0)" } ?? ""
+        let bookFileName = UUID().uuidString + bookFileExtension
+        let bookFileUrl = bookUploadPath + bookFileName
 
         let coverImageUploadPath = req.application.directory.resourcesDirectory + "bookCovers/"
-        let coverImageFilename = coverImageFile.filename
-        let coverImageFileUrl = coverImageUploadPath + coverImageFilename
+        let coverImageFileExtension = coverImageFile.extension.map { ".\($0)" } ?? ""
+        let coverImageFileName = UUID().uuidString + coverImageFileExtension
+        let coverImageFileUrl = coverImageUploadPath + coverImageFileName
 
         do {
             try FileManager.default.createDirectory(atPath: bookUploadPath, withIntermediateDirectories: true, attributes: nil)
@@ -91,7 +93,7 @@ struct BookController: RouteCollection {
             throw Abort(.internalServerError, reason: "Failed to write file: \(error.localizedDescription)")
         }
 
-        let downloadCoverImageUrl = "\(Book.schema)/coverImages/\(coverImageFilename)"
+        let downloadCoverImageUrl = "\(Book.schema)/coverImages/\(coverImageFileName)"
 
         let bookData = try Book(from: bookDto,
                                 withFileUrl: bookFileUrl,

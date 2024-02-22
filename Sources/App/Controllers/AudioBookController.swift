@@ -37,8 +37,9 @@ struct AudioBookController: RouteCollection {
         let file = audioBookDto.file
 
         let uploadPath = req.application.directory.workingDirectory + "uploads/audiobooks/"
-        let filename = UUID().uuidString
-        let fileUrl = uploadPath + filename
+        let fileExtension = file.extension.map { ".\($0)" } ?? ""
+        let fileName = UUID().uuidString + fileExtension
+        let fileUrl = uploadPath + fileName
 
         do {
             try FileManager.default.createDirectory(atPath: uploadPath, withIntermediateDirectories: true, attributes: nil)
