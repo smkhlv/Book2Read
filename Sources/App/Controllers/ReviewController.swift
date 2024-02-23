@@ -12,7 +12,21 @@ struct ReviewController: RouteCollection {
 
     func addReview(req: Request) async throws -> HTTPStatus {
         let review = try req.content.decode(Review.self)
+        let bookID = review.bookId
 
+        guard let book = try await Book.find(bookID, on: req.db) else {
+            throw Abort(.notFound, reason: "Book with ID \(bookID) not found")
+        }
+
+        let newRatingCount = book.ratingCount + 1
+        let currentTotalRating = book.rating * Double(book.ratingCount)
+        let newTotalRating = currentTotalRating + Double(review.rating)
+        let newRating = newTotalRating / Double(newRatingCount)
+
+        book.ratingCount = newRatingCount
+        book.rating = newRating
+
+        try await book.save(on: req.db)
         try await review.save(on: req.db)
 
         return .ok
