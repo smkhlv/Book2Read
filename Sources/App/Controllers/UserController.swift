@@ -37,6 +37,7 @@ struct UserController: RouteCollection {
         tokenProtected.post("logout", use: logout)
         tokenProtected.post(":bookId", "buy", use: buyBook)
         tokenProtected.post("setLanguage", use: setLanguage)
+        tokenProtected.post(":userId", use: getUser)
 
         let passwordProtected = usersRoute.grouped(User.authenticator())
         passwordProtected.post("login", use: login)
@@ -125,6 +126,18 @@ struct UserController: RouteCollection {
         try await user.save(on: req.db)
 
         return .ok
+    }
+
+    private func getUser(req: Request) async throws -> User.Public {
+        guard let userId = req.parameters.get("userId", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid user ID")
+        }
+
+        guard let user = try await User.find(userId, on: req.db) else {
+            throw Abort(.notFound, reason: "User \(userId) is not found")
+        }
+
+        return try user.asPublic()
     }
 
     private func checkIfUserExists(_ username: String, req: Request) -> EventLoopFuture<Bool> {
