@@ -14,6 +14,8 @@ final class User: Model {
         let username: String
         let createdAt: Date?
         let updatedAt: Date?
+        let boughtBooksIds: [UUID]
+        let language: String
     }
 
     static let schema = "users"
@@ -33,18 +35,33 @@ final class User: Model {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
 
+    @Field(key: "bought_book_ids")
+    var boughtBooksIds: [UUID]
+
+    @Field(key: "language")
+    var language: String
+
     init() {}
 
-    init(id: UUID? = nil, username: String, passwordHash: String) {
+    init(id: UUID? = nil,
+         username: String,
+         passwordHash: String,
+         boughtBooksIds: [UUID] = [],
+         language: String)
+    {
         self.id = id
         self.username = username
         self.passwordHash = passwordHash
+        self.boughtBooksIds = boughtBooksIds
+        self.language = language
     }
 }
 
 extension User {
     static func create(from userSignup: UserSignup) throws -> User {
-        try User(username: userSignup.username, passwordHash: Bcrypt.hash(userSignup.password))
+        try User(username: userSignup.username,
+                 passwordHash: Bcrypt.hash(userSignup.password),
+                 language: userSignup.language)
     }
 
     func createToken(source: SessionSource) throws -> Token {
@@ -58,7 +75,9 @@ extension User {
         try Public(id: requireID(),
                    username: username,
                    createdAt: createdAt,
-                   updatedAt: updatedAt)
+                   updatedAt: updatedAt,
+                   boughtBooksIds: boughtBooksIds,
+                   language: language)
     }
 }
 

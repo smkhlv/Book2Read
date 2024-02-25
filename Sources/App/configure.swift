@@ -1,30 +1,29 @@
-import NIOSSL
 import Fluent
 import FluentPostgresDriver
+import NIOSSL
 import Vapor
 
-// configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-
-    app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
+    try app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",
         port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
         username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
         password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
         database: Environment.get("DATABASE_NAME") ?? "vapor_database",
-        tls: .prefer(try .init(configuration: .clientDefault)))
-    ), as: .psql)
+        tls: .prefer(.init(configuration: .clientDefault))
+    )), as: .psql)
 
     app.migrations.add(CreateUsers())
     app.migrations.add(CreateTokens())
+
     app.migrations.add(CreateBooks())
+    app.migrations.add(CreateAudioBooks())
+
     app.migrations.add(CreateReadingProgress())
     app.migrations.add(CreateQuotes())
     app.migrations.add(CreateReview())
-    app.migrations.add(CreateAudioBooks())
 
-    // register routes
+    app.migrations.add(CreateNews())
+
     try routes(app)
 }

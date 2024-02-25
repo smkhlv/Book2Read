@@ -25,9 +25,8 @@ struct CreateBooks: AsyncMigration {
             .field("backCoverText", .string, .required)
             .field("coverImageUrl", .string, .required)
             .field("authorId", .uuid, .required)
-            .field("fileUrl", .string, .required)
-            .field("audio_book", .uuid, .required, .references("audiobooks", "id"))
             .field("language", .string, .required)
+            .field("fileUrl", .string, .required)
 
         try await schema.create()
     }
